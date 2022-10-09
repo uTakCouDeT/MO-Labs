@@ -225,7 +225,7 @@ public:
         }
 
         // Вывод при отсутствии опорного решения
-        if (!solutionExists){
+        if (!solutionExists) {
             std::cout << "No solution exists!";
         }
 
@@ -291,8 +291,9 @@ public:
                       << -c[i] << " * x" << RowXmas[i] << "   +   ";
         }
         std::cout << std::fixed << std::setprecision(2)
-                  << -c[c.size() - 1] << " * x" << RowXmas[c.size() - 1]
-                  << "\n------------------------------------------------------------------\n";
+                  << -c[c.size() - 1] << " * x" << RowXmas[c.size() - 1] << "  -->  ";
+        if (Max) { std::cout << "max"; } else { std::cout << "min"; }
+        std::cout << "\n------------------------------------------------------------------\n";
         auto Matrix = ConvertToMatrix();
         for (int i = 0; i < Matrix.size() - 1; ++i) {
             for (int j = 0; j < Matrix[i].size() - 2; ++j) {
