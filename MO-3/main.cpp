@@ -165,10 +165,12 @@ public:
     }
 
     /// Преобразование симплекс таблицы
-    void SimplexTableFormation() {
-        std::cout << "The resolving row: x" << ColXmas[r]
-                  << "\nThe resolving col: x" << RowXmas[k]
-                  << "\n=====================\n" << std::endl;
+    void SimplexTableFormation(bool Silence = false) {
+        if (!Silence) {
+            std::cout << "The resolving row: x" << ColXmas[r]
+                      << "\nThe resolving col: x" << RowXmas[k]
+                      << "\n=====================\n" << std::endl;
+        }
 
         // Преобразование в матрицу
         auto Matrix = ConvertToMatrix();
@@ -207,20 +209,25 @@ public:
     }
 
     /// Симплекс метод
-    void SimplexMethod() {
+    void SimplexMethod(bool Silence = false) {
         std::cout << std::endl;
-        CanonicalTransformation();
-        std::cout << std::endl;
-        Print();
+        if (Silence) { CanonicalPrint(); }
+        else {
+            CanonicalTransformation();
+            std::cout << std::endl;
+        }
+        if (!Silence) { Print(); }
 
         // Нахождение опорного решения
         while (solutionExists) {
             if (CheckSolution()) {
-                std::cout << "A reference solution is found\n======================================" << std::endl;
+                if (!Silence) {
+                    std::cout << "A reference solution is found\n======================================" << std::endl;
+                }
                 break;
             } else {
-                SimplexTableFormation();
-                Print();
+                SimplexTableFormation(Silence);
+                if (!Silence) { Print(); }
             }
         }
 
@@ -248,8 +255,8 @@ public:
                 }
                 break;
             } else {
-                SimplexTableFormation();
-                Print();
+                SimplexTableFormation(Silence);
+                if (!Silence) { Print(); }
             }
         }
     }
@@ -342,7 +349,7 @@ int main() {
     std::vector<double> b = {5, 7, 6};
 
     Simplex SimplexTable = Simplex(c, A, b, "max");
-    SimplexTable.SimplexMethod();
+    SimplexTable.SimplexMethod(true);
 
 
     //std::cout << "\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nExample for 2x3:\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n";
@@ -353,9 +360,8 @@ int main() {
                                            {1,  1}};
     std::vector<double> b1 = {2, -2, 5};
 
-    std::cout << std::endl;
-
     Simplex SimplexTable1 = Simplex(c1, A1, b1, "min");
+    //std::cout << std::endl;
     //SimplexTable1.SimplexMethod();
 
     return 0;
