@@ -1,0 +1,3 @@
+/home/user/Документы/GitHub/MO-Labs/MO-3/cmake-build-debug/CMakeFiles/MO_3.dir
+/home/user/Документы/GitHub/MO-Labs/MO-3/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/user/Документы/GitHub/MO-Labs/MO-3/cmake-build-debug/CMakeFiles/rebuild_cache.dir
