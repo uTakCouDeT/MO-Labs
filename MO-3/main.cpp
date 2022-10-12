@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <iomanip>
+#include <map>
 
 //Variant 23
 
@@ -61,6 +62,10 @@ public:
             std::cerr << "Enter: max/min ";
             exit(1);
         }
+    }
+
+    bool GetSolutionExists(){
+        return solutionExists;
     }
 
     /// Преобразование в матрицу
