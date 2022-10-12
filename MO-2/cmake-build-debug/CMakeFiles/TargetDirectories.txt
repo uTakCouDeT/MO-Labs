@@ -1,3 +1,3 @@
-C:/Users/user/CLionProjects/MO/MO-2/cmake-build-debug/CMakeFiles/MO_2.dir
-C:/Users/user/CLionProjects/MO/MO-2/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/user/CLionProjects/MO/MO-2/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/user/Документы/GitHub/MO-Labs/MO-2/cmake-build-debug/CMakeFiles/MO_2.dir
+/home/user/Документы/GitHub/MO-Labs/MO-2/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/user/Документы/GitHub/MO-Labs/MO-2/cmake-build-debug/CMakeFiles/rebuild_cache.dir
