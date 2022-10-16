@@ -2,7 +2,8 @@
 #include <vector>
 #include <string>
 #include <iomanip>
-#include <map>
+#include <set>
+#include <cmath>
 
 //Variant 23
 
@@ -16,17 +17,17 @@ class Simplex {
     int r;
     int k;
     bool Max;
-    bool solutionExists;
+    bool SolutionExists;
 
 public:
 
-    Simplex() : F(0), r(0), k(0), Max(true), solutionExists(true) {}
+    Simplex() : F(0), r(0), k(0), Max(true), SolutionExists(true) {}
 
     /// Ввод данных
     Simplex(std::vector<double> _c, std::vector<std::vector<double>> a,
             std::vector<double> _b, const std::string &extremum = "max") : c(std::move(_c)), A(std::move(a)),
                                                                            b(std::move(_b)), F(0), r(0), k(0),
-                                                                           solutionExists(true) {
+                                                                           SolutionExists(true) {
         // Проверка входных данных
         if (A.size() == b.size()) {
             for (auto &i: A) {
@@ -65,11 +66,19 @@ public:
     }
 
     bool GetSolutionExists() const {
-        return solutionExists;
+        return SolutionExists;
     }
 
     double GetFunction() const {
         return F;
+    }
+
+    std::vector<double> GetVecb() const {
+        return b;
+    }
+
+    std::vector<int> GetXmas() const {
+        return ColXmas;
     }
 
     /// Преобразование в матрицу
@@ -106,11 +115,11 @@ public:
         if (!isSolution) {
 
             // Поиск столбца с отрицательным элементом
-            solutionExists = false;
+            SolutionExists = false;
             for (int i = 0; i < A[r].size(); ++i) {
                 if (A[r][i] < 0) {
                     k = i;
-                    solutionExists = true;
+                    SolutionExists = true;
                     for (int j = k + 1; j < A[r].size(); ++j) {
                         if (A[r][j] < 0 && std::abs(A[r][j]) >= std::abs(A[r][k])) {
                             k = j;
@@ -224,15 +233,14 @@ public:
     /// Симплекс метод
     void SimplexMethod(bool Silence = false) {
         std::cout << std::endl;
-        if (Silence) { CanonicalPrint(); }
-        else {
-            CanonicalTransformation();
+        CanonicalPrint();
+        if (!Silence) {
             std::cout << std::endl;
+            Print();
         }
-        if (!Silence) { Print(); }
 
         // Нахождение опорного решения
-        while (solutionExists) {
+        while (SolutionExists) {
             if (CheckSolution()) {
                 if (!Silence) {
                     std::cout << "A reference solution is found\n======================================"
@@ -246,12 +254,12 @@ public:
         }
 
         // Вывод при отсутствии опорного решения
-        if (!solutionExists) {
+        if (!SolutionExists) {
             std::cout << "No solution exists!";
         }
 
         // Нахождение оптимального решения
-        while (solutionExists) {
+        while (SolutionExists) {
             if (CheckOptimality()) {
                 std::cout << "\nF = " << F << std::endl;
                 for (int i = 0; i < c.size(); ++i) {
@@ -328,31 +336,15 @@ public:
         std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
     }
 
-    /// Вывод преобразований в каноническом виде
-    void CanonicalTransformation() {
-        CanonicalPrint();
-        auto Matrix = ConvertToMatrix();
-        for (int i = 0; i < Matrix.size() - 1; ++i) {
-            for (int j = 0; j < Matrix[i].size() - 1; ++j) {
-                std::cout << std::fixed << std::setprecision(2)
-                          << Matrix[i][j] << " * x" << RowXmas[j] << "   +   ";
-            }
-            std::cout << 'x' << ColXmas[i] << "   =   " << Matrix[i][Matrix[i].size() - 1] << std::endl;
-        }
-        std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
-
-        for (int i = 0; i < Matrix.size() - 1; ++i) {
-            std::cout << 'x' << ColXmas[i] << "   =   " << Matrix[i][Matrix[i].size() - 1] << "   -   (";
-            for (int j = 0; j < Matrix[i].size() - 2; ++j) {
-                std::cout << std::fixed << std::setprecision(2)
-                          << Matrix[i][j] << " * x" << RowXmas[j] << "   +   ";
-            }
-            std::cout << std::fixed << std::setprecision(2)
-                      << Matrix[i][Matrix[i].size() - 2] << " * x"
-                      << RowXmas[Matrix[i].size() - 2] << ")" << std::endl;
-        }
-        std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
+    bool operator==(const Simplex &simplex) const {
+        return (c == simplex.c && A == simplex.A && b == simplex.b && F == simplex.F &&
+                RowXmas == simplex.RowXmas && ColXmas == simplex.ColXmas && Max == simplex.Max);
     }
+
+    bool operator<(const Simplex &simplex) const {
+        return F < simplex.F;
+    }
+
 };
 
 class MVG {
@@ -361,16 +353,17 @@ class MVG {
     std::vector<double> b;
     double F;
     bool Max;
-    bool solutionExists;
+    bool SolutionExists;
+    std::set<Simplex> Solutions;
 public:
 
-    MVG() : F(0), Max(true), solutionExists(true) {}
+    MVG() : F(0), Max(true), SolutionExists(true) {}
 
     /// Ввод данных
     MVG(std::vector<double> _c, std::vector<std::vector<double>> a,
         std::vector<double> _b, const std::string &extremum = "max") : c(std::move(_c)), A(std::move(a)),
                                                                        b(std::move(_b)), F(0),
-                                                                       solutionExists(true) {
+                                                                       SolutionExists(true) {
         // Проверка входных данных
         if (A.size() == b.size()) {
             for (auto &i: A) {
@@ -394,18 +387,46 @@ public:
     }
 
     void BranchAndBoundaryMethod(bool Silence = true) {
+        std::cout << "\nFirst Simplex Method:";
         std::string extremum;
         if (Max) { extremum = "max"; } else { extremum = "min"; }
-        Simplex SimplexTable = Simplex(c, A, b, extremum);
-        SimplexTable.SimplexMethod(Silence);
+        Simplex T = Simplex(c, A, b, extremum);
+        T.SimplexMethod(Silence);
+        if (T.GetSolutionExists()) {
+            bool IsIntegerSolution = true;
+            int BranchingVariable = 0;
+            double BranchingVariableValue = 0;
+            std::vector<double> Variables = T.GetVecb();
+            for (int i = 0; i < Variables.size(); ++i) {
+                if (Variables[i] != floor(Variables[i])) {
+                    IsIntegerSolution = false;
+                    BranchingVariable = T.GetXmas()[i];
+                    BranchingVariableValue = Variables[i];
+                    break;
+                }
+            }
+            if (IsIntegerSolution) { Solutions.insert(T); }
+            else {
+                std::cout << "\n==================================================================\n";
+                std::cout << "First branching variable: x" << BranchingVariable << " = "
+                          << BranchingVariableValue << std::endl;
+                std::cout << "------------------------------------------------------------------\n";
+            }
+        }
+    }
+
+    void PrintSet() {
+        for (const Simplex &i: Solutions) {
+            std::cout << i.GetFunction();
+        }
     }
 
 };
 
 int main() {
     std::vector<double> c = {1, 5, 5};
-    std::vector<std::vector<double>> A = {{4, 1, 1},
-                                          {1, 4, 0},
+    std::vector<std::vector<double>> A = {{4, 1,   1},
+                                          {1, 4,   0},
                                           {0, 0.5, 4}};
     std::vector<double> b = {5, 7, 6};
 
