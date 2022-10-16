@@ -64,8 +64,12 @@ public:
         }
     }
 
-    bool GetSolutionExists(){
+    bool GetSolutionExists() const {
         return solutionExists;
+    }
+
+    double GetFunction() const {
+        return F;
     }
 
     /// Преобразование в матрицу
@@ -143,9 +147,13 @@ public:
         for (int i = 0; i < c.size(); ++i) {
             if ((Max && c[i] <= 0) || (!Max && c[i] >= 0)) {
                 isOptimal = false;
-                if (std::abs(c[i]) >= std::abs(c[k])) {
-                    k = i;
+                k = i;
+                for (int j = i + 1; j < c.size(); ++j) {
+                    if (((Max && c[j] <= 0) || (!Max && c[j] >= 0)) && std::abs(c[j]) >= std::abs(c[k])) {
+                        k = j;
+                    }
                 }
+                break;
             }
         }
 
@@ -227,7 +235,8 @@ public:
         while (solutionExists) {
             if (CheckSolution()) {
                 if (!Silence) {
-                    std::cout << "A reference solution is found\n======================================" << std::endl;
+                    std::cout << "A reference solution is found\n======================================"
+                              << std::endl;
                 }
                 break;
             } else {
@@ -346,28 +355,73 @@ public:
     }
 };
 
+class MVG {
+    std::vector<double> c;
+    std::vector<std::vector<double>> A;
+    std::vector<double> b;
+    double F;
+    bool Max;
+    bool solutionExists;
+public:
+
+    MVG() : F(0), Max(true), solutionExists(true) {}
+
+    /// Ввод данных
+    MVG(std::vector<double> _c, std::vector<std::vector<double>> a,
+        std::vector<double> _b, const std::string &extremum = "max") : c(std::move(_c)), A(std::move(a)),
+                                                                       b(std::move(_b)), F(0),
+                                                                       solutionExists(true) {
+        // Проверка входных данных
+        if (A.size() == b.size()) {
+            for (auto &i: A) {
+                if (i.size() != c.size()) {
+                    std::cerr << "Invalid arguments!";
+                    exit(1);
+                }
+            }
+        } else {
+            std::cerr << "Invalid arguments!";
+            exit(1);
+        }
+
+        // Минимум или максимум
+        if (extremum == "max") { Max = true; }
+        else if (extremum == "min") { Max = false; }
+        else {
+            std::cerr << "Enter: max/min ";
+            exit(1);
+        }
+    }
+
+    void BranchAndBoundaryMethod(bool Silence = true) {
+        std::string extremum;
+        if (Max) { extremum = "max"; } else { extremum = "min"; }
+        Simplex SimplexTable = Simplex(c, A, b, extremum);
+        SimplexTable.SimplexMethod(Silence);
+    }
+
+};
+
 int main() {
     std::vector<double> c = {1, 5, 5};
-    std::vector<std::vector<double>> A = {{4, 1,   1},
-                                          {1, 4,   0},
+    std::vector<std::vector<double>> A = {{4, 1, 1},
+                                          {1, 4, 0},
                                           {0, 0.5, 4}};
     std::vector<double> b = {5, 7, 6};
 
-    Simplex SimplexTable = Simplex(c, A, b, "max");
-    SimplexTable.SimplexMethod(true);
+    auto mvg = MVG(c, A, b, "max");
+    //mvg.BranchAndBoundaryMethod();
 
 
     //std::cout << "\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nExample for 2x3:\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n";
 
-    std::vector<double> c1 = {-1, 1};
-    std::vector<std::vector<double>> A1 = {{1,  -2},
-                                           {-2, 1},
-                                           {1,  1}};
-    std::vector<double> b1 = {2, -2, 5};
+    std::vector<double> c1 = {-12, 1};
+    std::vector<std::vector<double>> A1 = {{6, -1},
+                                           {2, 5},};
+    std::vector<double> b1 = {12, 20};
 
-    Simplex SimplexTable1 = Simplex(c1, A1, b1, "min");
-    //std::cout << std::endl;
-    //SimplexTable1.SimplexMethod();
+    auto mvg1 = MVG(c1, A1, b1, "min");
+    mvg1.BranchAndBoundaryMethod();
 
     return 0;
 }
