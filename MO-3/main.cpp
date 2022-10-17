@@ -154,7 +154,7 @@ public:
 
         // Поиск максимального по модулю элемента неподходящего знака
         for (int i = 0; i < c.size(); ++i) {
-            if ((Max && c[i] <= 0) || (!Max && c[i] >= 0)) {
+            if ((Max && c[i] < 0) || (!Max && c[i] > 0)) {
                 isOptimal = false;
                 k = i;
                 for (int j = i + 1; j < c.size(); ++j) {
@@ -170,11 +170,11 @@ public:
 
             // Поиск минимального положительного отношения
             for (int i = 0; i < A.size(); ++i) {
-                if (A[i][k] != 0 && b[i] / A[i][k] > 0) {
+                if (A[i][k] != 0 && b[i] / A[i][k] >= 0) {
                     double Ratio = b[i] / A[i][k];
                     r = i;
                     for (int j = i + 1; j < A.size(); ++j) {
-                        if (A[j][k] != 0 && b[j] / A[j][k] > 0 && b[j] / A[j][k] < Ratio) {
+                        if (A[j][k] != 0 && b[j] / A[j][k] >= 0 && b[j] / A[j][k] < Ratio) {
                             r = j;
                             Ratio = b[j] / A[j][k];
                         }
@@ -255,7 +255,7 @@ public:
 
         // Вывод при отсутствии опорного решения
         if (!SolutionExists) {
-            std::cout << "No solution exists!";
+            std::cout << "No solution exists!\n";
         }
 
         // Нахождение оптимального решения
@@ -315,23 +315,26 @@ public:
     void CanonicalPrint() {
         std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
         std::cout << "F   =   ";
-        for (int i = 0; i < c.size() - 1; ++i) {
-            std::cout << std::fixed << std::setprecision(2)
-                      << -c[i] << " * x" << RowXmas[i] << "   +   ";
+        std::cout << std::fixed << std::setprecision(2) << -c[0] << " * x" << RowXmas[0];
+        for (int i = 1; i < c.size(); ++i) {
+            if (c[i] <= 0) { std::cout << "   +   "; } else { std::cout << "   -   "; }
+            std::cout << std::fixed << std::setprecision(2) << -c[i] << " * x" << RowXmas[i];
         }
-        std::cout << std::fixed << std::setprecision(2)
-                  << -c[c.size() - 1] << " * x" << RowXmas[c.size() - 1] << "  -->  ";
+        std::cout << "  -->  ";
         if (Max) { std::cout << "max"; } else { std::cout << "min"; }
         std::cout << "\n------------------------------------------------------------------\n";
         auto Matrix = ConvertToMatrix();
         for (int i = 0; i < Matrix.size() - 1; ++i) {
-            for (int j = 0; j < Matrix[i].size() - 2; ++j) {
-                std::cout << std::fixed << std::setprecision(2)
-                          << Matrix[i][j] << " * x" << RowXmas[j] << "   +   ";
+            std::cout << std::fixed << std::setprecision(2) << Matrix[i][0] << " * x" << RowXmas[0];
+            for (int j = 1; j < Matrix[i].size() - 1; ++j) {
+                if (Matrix[i][j] >= 0) { std::cout << "   +   "; } else { std::cout << "   -   "; }
+                std::cout << std::fixed << std::setprecision(2) << std::abs(Matrix[i][j])
+                          << " * x" << RowXmas[j];
             }
-            std::cout << std::fixed << std::setprecision(2) << Matrix[i][Matrix[i].size() - 2]
-                      << " * x" << RowXmas[Matrix[i].size() - 2]
-                      << "   <=   " << Matrix[i][Matrix[i].size() - 1] << std::endl;
+            std::cout << "   <=  ";
+            if (Matrix[i][Matrix[i].size() - 1] >= 0) { std::cout << ' '; }
+            std::cout << Matrix[i][Matrix[i].size() - 1];
+            std::cout << std::endl;
         }
         std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
     }
@@ -386,38 +389,103 @@ public:
         }
     }
 
-    void BranchAndBoundaryMethod(bool Silence = true) {
+    bool IsIntegerSolution(const Simplex &T) {
+        if (T.GetSolutionExists()) {
+            bool IsInteger = true;
+            std::vector<double> Variables = T.GetVecb();
+            for (double Variable: T.GetVecb()) {
+                for (int i = 0; i < Variables.size(); ++i) {
+                    if (Variables[i] != floor(Variables[i]) && T.GetXmas()[i] <= c.size()) {
+                        IsInteger = false;
+                        break;
+                    }
+                }
+            }
+            return IsInteger;
+        } else {
+            return false;
+        }
+    }
+
+    std::pair<int, double> BranchingVariableSearch(const Simplex &T) {
+        std::pair<int, double> BranchingVar;
+        std::vector<double> Variables = T.GetVecb();
+        for (int i = 0; i < Variables.size(); ++i) {
+            if (Variables[i] != floor(Variables[i]) && T.GetXmas()[i] <= c.size()) {
+                BranchingVar.first = T.GetXmas()[i];
+                BranchingVar.second = Variables[i];
+                break;
+            }
+        }
+        return BranchingVar;
+    }
+
+    void MVGIteration(int BranchingVariable, double BranchingVariableValue, std::vector<std::vector<double>> LocalA,
+                      std::vector<double> Localb, bool Silence = false) {
+        std::string extremum;
+        if (Max) { extremum = "max"; } else { extremum = "min"; }
+        std::vector<double> ZeroMas(LocalA[0].size());
+
+        std::cout << "\n==============================\n" << "Branching variable: x"
+                  << BranchingVariable << " = " << BranchingVariableValue
+                  << "\n==============================\n\n# Introduce a new constrain: x"
+                  << BranchingVariable << " <= " << floor(BranchingVariableValue);
+
+        std::vector<std::vector<double>> DownA = LocalA;
+        std::vector<double> Downb = Localb;
+        Downb.push_back(floor(BranchingVariableValue));
+        ZeroMas[BranchingVariable - 1] = 1;
+        DownA.push_back(ZeroMas);
+
+        Simplex DownT = Simplex(c, DownA, Downb, extremum);
+        DownT.SimplexMethod(Silence);
+        if (IsIntegerSolution(DownT)) { Solutions.insert(DownT); }
+        else {
+            if (DownT.GetSolutionExists()) {
+                std::pair<int, double> BranchingVar = BranchingVariableSearch(DownT);
+                MVGIteration(BranchingVar.first, BranchingVar.second, DownA, Downb, Silence);
+            }
+        }
+
+        std::cout << "\n# Introduce a new constrain: x" << BranchingVariable << " >= "
+                  << ceil(BranchingVariableValue);
+
+        std::vector<std::vector<double>> UpA = LocalA;
+        std::vector<double> Upb = Localb;
+        Upb.push_back(-ceil(BranchingVariableValue));
+        ZeroMas[BranchingVariable - 1] = -1;
+        UpA.push_back(ZeroMas);
+
+        Simplex UpT = Simplex(c, UpA, Upb, extremum);
+        UpT.SimplexMethod(Silence);
+        if (IsIntegerSolution(UpT)) { Solutions.insert(UpT); }
+        else {
+            if (UpT.GetSolutionExists()) {
+                std::pair<int, double> BranchingVar = BranchingVariableSearch(UpT);
+                MVGIteration(BranchingVar.first, BranchingVar.second, DownA, Downb, Silence);
+            }
+        }
+    }
+
+
+    void BranchAndBoundaryMethod(bool Silence = false) {
         std::cout << "\nFirst Simplex Method:";
         std::string extremum;
         if (Max) { extremum = "max"; } else { extremum = "min"; }
         Simplex T = Simplex(c, A, b, extremum);
         T.SimplexMethod(Silence);
-        if (T.GetSolutionExists()) {
-            bool IsIntegerSolution = true;
-            int BranchingVariable = 0;
-            double BranchingVariableValue = 0;
-            std::vector<double> Variables = T.GetVecb();
-            for (int i = 0; i < Variables.size(); ++i) {
-                if (Variables[i] != floor(Variables[i])) {
-                    IsIntegerSolution = false;
-                    BranchingVariable = T.GetXmas()[i];
-                    BranchingVariableValue = Variables[i];
-                    break;
-                }
-            }
-            if (IsIntegerSolution) { Solutions.insert(T); }
-            else {
-                std::cout << "\n==================================================================\n";
-                std::cout << "First branching variable: x" << BranchingVariable << " = "
-                          << BranchingVariableValue << std::endl;
-                std::cout << "------------------------------------------------------------------\n";
+        if (IsIntegerSolution(T)) { Solutions.insert(T); }
+        else {
+            if (T.GetSolutionExists()) {
+                std::pair<int, double> BranchingVar = BranchingVariableSearch(T);
+                MVGIteration(BranchingVar.first, BranchingVar.second, A, b, Silence);
             }
         }
     }
 
     void PrintSet() {
         for (const Simplex &i: Solutions) {
-            std::cout << i.GetFunction();
+            std::cout << "F = " << i.GetFunction() << std::endl;
         }
     }
 
@@ -431,7 +499,7 @@ int main() {
     std::vector<double> b = {5, 7, 6};
 
     auto mvg = MVG(c, A, b, "max");
-    //mvg.BranchAndBoundaryMethod();
+    mvg.BranchAndBoundaryMethod(false);
 
 
     //std::cout << "\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nExample for 2x3:\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n";
@@ -442,7 +510,8 @@ int main() {
     std::vector<double> b1 = {12, 20};
 
     auto mvg1 = MVG(c1, A1, b1, "min");
-    mvg1.BranchAndBoundaryMethod();
+    //mvg1.BranchAndBoundaryMethod();
+    //mvg1.PrintSet();
 
     return 0;
 }
