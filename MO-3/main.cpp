@@ -480,15 +480,28 @@ public:
                 MVGIteration(BranchingVar.first, BranchingVar.second, A, b, Silence);
             }
         }
-        std::cout << std::endl;
-        PrintSet();
+
+        Simplex result;
+        if (Max) { result = *std::prev(Solutions.end()); } else { result = *Solutions.begin(); }
+        std::cout << "\nOptimal integer solution:\nF = " << result.GetFunction() << std::endl;
+        for (int i = 0; i < c.size(); ++i) {
+            bool zero = true;
+            for (int j = 0; j < result.GetXmas().size(); ++j) {
+                if (result.GetXmas()[j] == (i + 1)) {
+                    std::cout << "x" << i + 1 << " = " << result.GetVecb()[j] << std::endl;
+                    zero = false;
+                    break;
+                }
+            }
+            if (zero) {
+                std::cout << "x" << i + 1 << " = " << 0 << std::endl;
+            }
+        }
     }
 
     void PrintSet() {
         for (const Simplex &i: Solutions) {
-            if (Max && i == *Solutions.end()) { continue;}
             std::cout << "F = " << i.GetFunction() << std::endl;
-            if (!Max) {break;}
         }
     }
 
@@ -503,9 +516,10 @@ int main() {
 
     auto mvg = MVG(c, A, b, "max");
     mvg.BranchAndBoundaryMethod(true);
+    //mvg.PrintSet();
 
 
-    //std::cout << "\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nExample for 2x3:\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n";
+    //std::cout << "\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nExample for 2x2:\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n";
 
     std::vector<double> c1 = {-12, 1};
     std::vector<std::vector<double>> A1 = {{6, -1},
