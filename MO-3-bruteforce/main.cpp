@@ -131,7 +131,7 @@ void BruteForce(std::vector<double> c, std::vector<std::vector<double>> A, std::
             }
         }
     }
-    std::cout << "\nOptimal solution:\n" << "(" << X1 << ", " << X2 << ", " << X3 << ") F = " << F << std::endl;
+    std::cout << "\nOptimal integer solution:\n" << "(" << X1 << ", " << X2 << ", " << X3 << ") F = " << F << std::endl;
 }
 
 int main() {
