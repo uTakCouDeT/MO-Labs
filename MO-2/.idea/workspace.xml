@@ -24,9 +24,11 @@
       <change beforePath="$PROJECT_DIR$/../MO-1/cmake-build-debug/CMakeFiles/MO_1.dir/main.cpp.obj" beforeDir="false" afterPath="$PROJECT_DIR$/../MO-1/cmake-build-debug/CMakeFiles/MO_1.dir/main.cpp.obj" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../MO-1/cmake-build-debug/MO_1.exe" beforeDir="false" afterPath="$PROJECT_DIR$/../MO-1/cmake-build-debug/MO_1.exe" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../MO-1/cmake-build-debug/Testing/Temporary/LastTest.log" beforeDir="false" afterPath="$PROJECT_DIR$/../MO-1/cmake-build-debug/Testing/Temporary/LastTest.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MO-1/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../MO-1/main.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/Testing/Temporary/LastTest.log" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/Testing/Temporary/LastTest.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MO-3/cmake-build-debug/CMakeFiles/MO_3.dir/main.cpp.obj" beforeDir="false" afterPath="$PROJECT_DIR$/../MO-3/cmake-build-debug/CMakeFiles/MO_3.dir/main.cpp.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MO-3/cmake-build-debug/CMakeFiles/MO_3.dir/objects.a" beforeDir="false" afterPath="$PROJECT_DIR$/../MO-3/cmake-build-debug/CMakeFiles/MO_3.dir/objects.a" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MO-3/cmake-build-debug/MO_3.exe" beforeDir="false" afterPath="$PROJECT_DIR$/../MO-3/cmake-build-debug/MO_3.exe" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../MO-3/cmake-build-debug/Testing/Temporary/LastTest.log" beforeDir="false" afterPath="$PROJECT_DIR$/../MO-3/cmake-build-debug/Testing/Temporary/LastTest.log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../MO-3/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../MO-3/main.cpp" afterDir="false" />
     </list>
@@ -87,6 +89,7 @@
       <workItem from="1665606564213" duration="4000" />
       <workItem from="1665933117454" duration="4000" />
       <workItem from="1665942247496" duration="8000" />
+      <workItem from="1665963006120" duration="1473000" />
     </task>
     <servers />
   </component>
