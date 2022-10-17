@@ -354,19 +354,18 @@ class MVG {
     std::vector<double> c;
     std::vector<std::vector<double>> A;
     std::vector<double> b;
-    double F;
+    Simplex F;
     bool Max;
     bool SolutionExists;
     std::set<Simplex> Solutions;
 public:
 
-    MVG() : F(0), Max(true), SolutionExists(true) {}
+    MVG() : Max(true), SolutionExists(true) {}
 
     /// Ввод данных
     MVG(std::vector<double> _c, std::vector<std::vector<double>> a,
         std::vector<double> _b, const std::string &extremum = "max") : c(std::move(_c)), A(std::move(a)),
-                                                                       b(std::move(_b)), F(0),
-                                                                       SolutionExists(true) {
+                                                                       b(std::move(_b)), SolutionExists(true) {
         // Проверка входных данных
         if (A.size() == b.size()) {
             for (auto &i: A) {
@@ -481,11 +480,15 @@ public:
                 MVGIteration(BranchingVar.first, BranchingVar.second, A, b, Silence);
             }
         }
+        std::cout << std::endl;
+        PrintSet();
     }
 
     void PrintSet() {
         for (const Simplex &i: Solutions) {
+            if (Max && i == *Solutions.end()) { continue;}
             std::cout << "F = " << i.GetFunction() << std::endl;
+            if (!Max) {break;}
         }
     }
 
@@ -499,7 +502,7 @@ int main() {
     std::vector<double> b = {5, 7, 6};
 
     auto mvg = MVG(c, A, b, "max");
-    mvg.BranchAndBoundaryMethod(false);
+    mvg.BranchAndBoundaryMethod(true);
 
 
     //std::cout << "\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nExample for 2x3:\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n";
@@ -510,8 +513,7 @@ int main() {
     std::vector<double> b1 = {12, 20};
 
     auto mvg1 = MVG(c1, A1, b1, "min");
-    //mvg1.BranchAndBoundaryMethod();
-    //mvg1.PrintSet();
+    //mvg1.BranchAndBoundaryMethod(true);
 
     return 0;
 }
