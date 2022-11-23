@@ -3,6 +3,9 @@ import math
 import numpy as np
 import matplotlib.pyplot as pyplot
 
+# Вариант 23
+# Среднее гармоническое
+# Манхэттен
 
 def MovingAvgFind(K, M, FwithLine, alpha):
     MovingAvg = []
@@ -157,7 +160,7 @@ class Filtering(object):
             print("+-------+---------+---------+---------+")
             print()
 
-    def dotsPlot(self):
+    def DotsPrint(self):
 
         # pyplot.scatter(self.omegas[0], self.deltas[0], color='black')
         pyplot.scatter(self.omegas[1], self.deltas[1], color='red')
@@ -210,7 +213,7 @@ pyplot.legend(['f(x) = sin(x) + 0.5', 'Noise', 'Filtering'])
 pyplot.grid()
 pyplot.show()
 
-filter3.dotsPlot()
+filter3.DotsPrint()
 
 r = 5
 filter5 = Filtering(Signal, Noise, LambaMas, 5)
@@ -228,4 +231,4 @@ pyplot.legend(['f(x) = sin(x) + 0.5', 'Noise', 'Filtering'])
 pyplot.grid()
 pyplot.show()
 
-filter5.dotsPlot()
+filter5.DotsPrint()
