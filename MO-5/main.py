@@ -1,138 +1,135 @@
 import random
 import math
 import numpy as np
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as pyplot
 
 
-def FindOmega(FwithLine, M):
-    sum = 0
-    for k in range(1, 101 - 2 * M):
-        sum += abs(FwithLine[k] - FwithLine[k - 1])
-    return sum
-
-
-def FindAlpha(FwithLine, FwithWave, M):
-    sum = 0
-    for k in range(0, 101 - 2 * M):
-        sum += abs(FwithLine[k] - FwithWave[k])
-    return sum / 100
+def MovingAvgFind(K, M, FwithLine, alpha):
+    MovingAvg = []
+    for k in range(M, K - M + 1):
+        sum = 0
+        for j in range(k - M, k + M + 1):
+            sum += alpha[j + M + 1 - k - 1] / FwithLine[j - 1]
+        MovingAvg.append(sum)
+    return MovingAvg
 
 
 def AlphaMasGeneration(r, M):
-    if r == 3:
-        alphaMas = np.array([0, 0, 0], float)
-    if r == 5:
-        alphaMas = np.array([0, 0, 0, 0, 0], float)
+    alphaMas = []
+    for i in range(r):
+        alphaMas.append(0)
     center = random.random()
     alphaMas[M] = center
 
     for m in range(M, r - 2):
-        summary = 0
+        sum = 0
         for s in range(m, r - m):
-            summary += alphaMas[s]
-        center = random.uniform(0, 1 - summary) / 2
+            sum += alphaMas[s]
+        center = random.uniform(0, 1 - sum) / 2
         alphaMas[m - 1] = center
         alphaMas[r - m] = center
 
-    summary = 0
+    sum = 0
     for s in range(1, r - 1):
-        summary += alphaMas[s]
-    center = 0.5 * (1 - summary)
+        sum += alphaMas[s]
+    center = 0.5 * (1 - sum)
     alphaMas[0] = center
     alphaMas[r - 1] = center
     return alphaMas
 
 
-def Filtering(M, FwithLine, alpha):
-    FwithLineSred = []
-    for k in range(M, 100 - M + 1):
-        summary = 0
-        for j in range(k - M, k + M + 1):
-            summary += alpha[j + M + 1 - k - 1] / FwithLine[j - 1]
-        FwithLineSred.append(summary)
-    return FwithLineSred
+def FindOmega(FwithLine, K, M):
+    sum = 0
+    for k in range(1, K + 1 - 2 * M):
+        sum += abs(FwithLine[k] - FwithLine[k - 1])
+    return sum
 
 
-def signalGen(num):
-    return np.sin(num) + 0.5
+def FindDelta(FwithLine, FwithWave, K, M):
+    sum = 0
+    for k in range(0, K + 1 - 2 * M):
+        sum += abs(FwithLine[k] - FwithWave[k])
+    return sum / K
 
 
-class solvingClass(object):
+class Filtering(object):
 
-    def __init__(self, _signal, _noise, _lambda_arr, r):
-        self.optimal_a = []
+    def __init__(self, signal, noise, lambdaMas, r):
+        self.optimalAlpha = []
         self.omegas = []
         self.deltas = []
-        self.min_J = []
+        self.Jmin = []
         self.distant = []
         self.r = r
-        self.signal = _signal
-        self.noise = _noise
-        self.lambdas = _lambda_arr
+        self.Signal = signal
+        self.Noise = noise
+        self.LambdaMas = lambdaMas
 
-    def arithmeticMeanMethod(self, noise_arr, lambda_arr):
+    def GarmonicMeanMethod(self, noise_arr, lambdaMas):
         r = self.r
-        moving_aver = []
+        K = 100
         M = int((r - 1) / 2)
         N = int((math.log(1 - 0.95)) / math.log(1 - (0.01 / math.pi)))
-        for i in range(len(lambda_arr)):
-            best_a = np.array([])
-            best_omega = 0
-            best_delta = 0
-            min_J = 10000
-            for P in range(0, N):
-                a_arr = AlphaMasGeneration(r, M)
-                moving_aver = Filtering(M, noise_arr, a_arr)
-                omega = FindOmega(moving_aver, M)
-                delta = FindAlpha(moving_aver, self.noise, M)
-                J = lambda_arr[i] * omega + (1 - lambda_arr[i]) * delta
-                if J < min_J:
-                    min_J = J
-                    best_a = a_arr.copy()
-                    best_omega = omega
-                    best_delta = delta
-                moving_aver.clear()
-            self.min_J.append(min_J)
-            self.optimal_a.append(best_a)
-            self.omegas.append(best_omega)
-            self.deltas.append(best_delta)
-        print('aboba')
+        for i in range(len(lambdaMas)):
+            alphaMas = AlphaMasGeneration(r, M)
+            MovingAvg = MovingAvgFind(K, M, noise_arr, alphaMas)
+            omega = FindOmega(MovingAvg, K, M)
+            delta = FindDelta(MovingAvg, self.Noise, K, M)
+            Jmin = lambdaMas[i] * omega + (1 - lambdaMas[i]) * delta
+            for P in range(1, N):
+                alphaMas = AlphaMasGeneration(r, M)
+                MovingAvg = MovingAvgFind(K, M, noise_arr, alphaMas)
+                omega = FindOmega(MovingAvg, K, M)
+                delta = FindDelta(MovingAvg, self.Noise, K, M)
+                J = lambdaMas[i] * omega + (1 - lambdaMas[i]) * delta
+                if J < Jmin:
+                    Jmin = J
+                    bestAlphaMas = alphaMas.copy()
+                    bestOmega = omega
+                    bestDelta = delta
+                MovingAvg.clear()
+            self.Jmin.append(Jmin)
+            self.optimalAlpha.append(bestAlphaMas)
+            self.omegas.append(bestOmega)
+            self.deltas.append(bestDelta)
 
-    def distantSearch(self):
+    def dist(self):
         for index in range(0, len(self.omegas)):
             self.distant.append(abs(self.omegas[index]) + abs(self.deltas[index]))
 
-    def optimalSignSearch(self):
+    def OptimalSignSearch(self):
         r = self.r
+        K = 100
         M = int((r - 1) / 2)
-        min_dist = min(self.distant)
-        index = self.distant.index(min_dist)
-        optimal_omega = self.omegas[index]
-        optimal_delta = self.deltas[index]
-        optimal_alphas = self.optimal_a[index]
-        optimal_lambda = 0.1 * index
-        optimal_J = optimal_lambda * optimal_omega + (1 - optimal_lambda) * optimal_delta
+        minDist = min(self.distant)
+        index = self.distant.index(minDist)
+        optimalOmega = self.omegas[index]
+        optimalDelta = self.deltas[index]
+        optimalAlphas = self.optimalAlpha[index]
+        optimalLambda = 0.1 * index
+        optimalJ = optimalLambda * optimalOmega + (1 - optimalLambda) * optimalDelta
 
         filtering = []
-        for k_elem in range(M, 100 - M + 1):
-            summary = 0
-            for j in range(k_elem - M, k_elem + M + 1):
-                summary += noiseUnit[j - 1] * optimal_alphas[j + M + 1 - k_elem - 1]
-            filtering.append(summary)
+        for k in range(M, K - M + 1):
+            sum = 0
+            for j in range(k - M, k + M + 1):
+                sum += Noise[j - 1] * optimalAlphas[j + M + 1 - k - 1]
+            filtering.append(sum)
 
-        return optimal_lambda, min_dist, optimal_alphas, optimal_omega, optimal_delta, filtering, optimal_J
+        return optimalLambda, minDist, optimalAlphas, optimalOmega, optimalDelta, filtering, optimalJ
 
-    def print(self, o_lambda, omega, delta, J):
+    def TextPrint(self, Lambda, omega, delta, J):
         r = self.r
         if r == 3:
             print("+-------+----------+----------------------+---------+---------+")
             print("|   h   |    dis   |         alpha        |    w    |    d    |")
             print("+-------+----------+----------------------+---------+---------+")
-            for i in range(0, len(self.lambdas)):
-                print(f"|  {self.lambdas[i]}", end="")
+            for i in range(0, len(self.LambdaMas)):
+                print(f"|  {self.LambdaMas[i]}", end="")
                 print(f"  |{round(self.distant[i], 5):>9f}", end="")
-                print(f" | {self.optimal_a[i][0]:>0.4f} {self.optimal_a[i][1]:>0.4f} {self.optimal_a[i][2]:>0.4f} ",
-                      end="")
+                print(
+                    f" | {self.optimalAlpha[i][0]:>0.4f} {self.optimalAlpha[i][1]:>0.4f} {self.optimalAlpha[i][2]:>0.4f} ",
+                    end="")
                 print(f"| {self.omegas[i]:>0.5f} |", end="")
                 print(f" {self.deltas[i]:>0.5f} |")
                 print("+-------+----------+----------------------+---------+---------+")
@@ -141,18 +138,19 @@ class solvingClass(object):
             print("+-------+----------+------------------------------------+---------+---------+")
             print("|   h   |    dis   |                alpha               |    w    |    d    |")
             print("+-------+----------+------------------------------------+---------+---------+")
-            for i in range(0, len(self.lambdas)):
-                print(f"|  {self.lambdas[i]}", end="")
+            for i in range(0, len(self.LambdaMas)):
+                print(f"|  {self.LambdaMas[i]}", end="")
                 print(f"  |{round(self.distant[i], 5):>9f}", end="")
-                print(f" | {self.optimal_a[i][0]:>0.4f} {self.optimal_a[i][1]:>0.4f} {self.optimal_a[i][2]:>0.4f}"
-                      f" {self.optimal_a[i][3]:>0.4f} {self.optimal_a[i][4]:>0.4f} ", end="")
+                print(
+                    f" | {self.optimalAlpha[i][0]:>0.4f} {self.optimalAlpha[i][1]:>0.4f} {self.optimalAlpha[i][2]:>0.4f}"
+                    f" {self.optimalAlpha[i][3]:>0.4f} {self.optimalAlpha[i][4]:>0.4f} ", end="")
                 print(f"| {self.omegas[i]:>0.5f} |", end="")
                 print(f" {self.deltas[i]:>0.5f} |")
                 print("+-------+----------+------------------------------------+---------+---------+")
             print("+-------+---------+---------+---------+")
             print("|   h*  |    J    |    w    |     d   |")
             print("+-------+---------+---------+---------+")
-            print(f"|  {o_lambda:>0.1f}", end="")
+            print(f"|  {Lambda:>0.1f}", end="")
             print(f"  | {J:>0.5f}", end="")
             print(f" | {omega:>0.5f} |", end="")
             print(f" {delta:>0.5f} |")
@@ -161,75 +159,73 @@ class solvingClass(object):
 
     def dotsPlot(self):
 
-        # plt.scatter(0, 0, color='purple')
-        plt.scatter(self.omegas[0], self.deltas[0], color='blue')
-        plt.scatter(self.omegas[1], self.deltas[1], color='green')
-        plt.scatter(self.omegas[2], self.deltas[2], color='grey')
-        plt.scatter(self.omegas[3], self.deltas[3], color='black')
-        plt.scatter(self.omegas[4], self.deltas[4], color='pink')
-        plt.scatter(self.omegas[5], self.deltas[5], color='yellow')
-        plt.scatter(self.omegas[6], self.deltas[6], color='lime')
-        plt.scatter(self.omegas[7], self.deltas[7], color='#ad09a3')
-        plt.scatter(self.omegas[8], self.deltas[8], color='orange')
-        plt.scatter(self.omegas[9], self.deltas[9], color='red')
-        plt.scatter(self.omegas[10], self.deltas[10], color='skyblue')
-        plt.legend([
-            f'{self.omegas[0]:>0.5f} {self.deltas[0]:>0.5f}', f'{self.omegas[1]:>0.5f} {self.deltas[1]:>0.5f}',
-            f'{self.omegas[2]:>0.5f} {self.deltas[2]:>0.5f}', f'{self.omegas[3]:>0.5f} {self.deltas[3]:>0.5f}',
-            f'{self.omegas[4]:>0.5f} {self.deltas[4]:>0.5f}', f'{self.omegas[5]:>0.5f} {self.deltas[5]:>0.5f}',
-            f'{self.omegas[6]:>0.5f} {self.deltas[6]:>0.5f}', f'{self.omegas[7]:>0.5f} {self.deltas[7]:>0.5f}',
-            f'{self.omegas[8]:>0.5f} {self.deltas[8]:>0.5f}', f'{self.omegas[9]:>0.5f} {self.deltas[9]:>0.5f}',
+        # pyplot.scatter(self.omegas[0], self.deltas[0], color='black')
+        pyplot.scatter(self.omegas[1], self.deltas[1], color='red')
+        pyplot.scatter(self.omegas[2], self.deltas[2], color='orange')
+        pyplot.scatter(self.omegas[3], self.deltas[3], color='yellow')
+        pyplot.scatter(self.omegas[4], self.deltas[4], color='lime')
+        pyplot.scatter(self.omegas[5], self.deltas[5], color='green')
+        pyplot.scatter(self.omegas[6], self.deltas[6], color='skyblue')
+        pyplot.scatter(self.omegas[7], self.deltas[7], color='blue')
+        pyplot.scatter(self.omegas[8], self.deltas[8], color='purple')
+        pyplot.scatter(self.omegas[9], self.deltas[9], color='pink')
+        pyplot.scatter(self.omegas[10], self.deltas[10], color='grey')
+        pyplot.legend([
+            # f'{self.omegas[0]:>0.5f} {self.deltas[0]:>0.5f}',
+            f'{self.omegas[1]:>0.5f} {self.deltas[1]:>0.5f}',
+            f'{self.omegas[2]:>0.5f} {self.deltas[2]:>0.5f}',
+            f'{self.omegas[3]:>0.5f} {self.deltas[3]:>0.5f}',
+            f'{self.omegas[4]:>0.5f} {self.deltas[4]:>0.5f}',
+            f'{self.omegas[5]:>0.5f} {self.deltas[5]:>0.5f}',
+            f'{self.omegas[6]:>0.5f} {self.deltas[6]:>0.5f}',
+            f'{self.omegas[7]:>0.5f} {self.deltas[7]:>0.5f}',
+            f'{self.omegas[8]:>0.5f} {self.deltas[8]:>0.5f}',
+            f'{self.omegas[9]:>0.5f} {self.deltas[9]:>0.5f}',
             f'{self.omegas[10]:>0.5f} {self.deltas[10]:>0.5f}'])
-        plt.ylabel("delta")
-        plt.xlabel("omega")
-        plt.grid()
-        plt.show()
-        """        
-        plt.scatter(self.omegas, self.deltas)
-        plt.xscale('log')
-        plt.yscale('log')
-        plt.grid()
-        plt.show()
-        """
+        pyplot.ylabel("delta")
+        pyplot.xlabel("omega")
+        pyplot.grid()
+        pyplot.show()
 
 
-k = np.array([float((k * math.pi) / 100) for k in range(0, 101)])
-signalUnit = np.array([signalGen(elem) for elem in k])
-noiseUnit = np.array([signalGen(elem) + (random.random() / 2 - 0.25) for elem in k])
-lambda_l = np.array([l_elem / 10 for l_elem in range(0, 11)])
+K = 100
+k = np.array([float((k * math.pi) / K) for k in range(0, K + 1)])
+Signal = np.array([(np.sin(elem) + 0.5) for elem in k])
+Noise = np.array([(np.sin(elem) + 0.5) + (random.random() / 2 - 0.25) for elem in k])
+LambaMas = np.array([l_elem / 10 for l_elem in range(0, 11)])
 
 r = 3
-mov_wind3 = solvingClass(signalUnit, noiseUnit, lambda_l, r)
-mov_wind3.arithmeticMeanMethod(noiseUnit, lambda_l)
-mov_wind3.distantSearch()
-o3_lambda, o3_dist, o3_alphas, o3_omega, o3_delta, o3_filtering_signal, o3_J = mov_wind3.optimalSignSearch()
-mov_wind3.print(o3_lambda, o3_omega, o3_delta, o3_J)
+filter3 = Filtering(Signal, Noise, LambaMas, r)
+filter3.GarmonicMeanMethod(Noise, LambaMas)
+filter3.dist()
+Lambda3, dist3, alphas3, omega3, delta3, filteringSignal3, J3 = filter3.OptimalSignSearch()
+filter3.TextPrint(Lambda3, omega3, delta3, J3)
 
-filter_k = np.array([float((k * math.pi) / 100) for k in range(1, 100)])
-plt.plot(k, signalUnit, k, noiseUnit, filter_k, o3_filtering_signal)
-plt.legend(['f(x) = sin(x) + 0.5', 'Noise', 'Filtering'])
-plt.xlabel('x')
-plt.ylabel('f(x)')
-plt.title('Размер скользящего окна r = 3')
-plt.grid()
-plt.show()
+kFilter3 = np.array([float((k * math.pi) / K) for k in range(1, K)])
+pyplot.plot(k, Signal, k, Noise, kFilter3, filteringSignal3)
+pyplot.title('Functions (r = 3)')
+pyplot.ylabel('f(x)')
+pyplot.xlabel('x')
+pyplot.legend(['f(x) = sin(x) + 0.5', 'Noise', 'Filtering'])
+pyplot.grid()
+pyplot.show()
 
-mov_wind3.dotsPlot()
+filter3.dotsPlot()
 
 r = 5
-mov_wind5 = solvingClass(signalUnit, noiseUnit, lambda_l, 5)
-mov_wind5.arithmeticMeanMethod(noiseUnit, lambda_l)
-mov_wind5.distantSearch()
-o5_lambda, o5_dist, o5_alphas, o5_omega, o5_delta, o5_filtering_signal, o5_J = mov_wind5.optimalSignSearch()
-mov_wind5.print(o5_lambda, o5_omega, o5_delta, o5_J)
+filter5 = Filtering(Signal, Noise, LambaMas, 5)
+filter5.GarmonicMeanMethod(Noise, LambaMas)
+filter5.dist()
+Lambda5, dist5, alphas5, omega5, delta5, filteringSignal5, J5 = filter5.OptimalSignSearch()
+filter5.TextPrint(Lambda5, omega5, delta5, J5)
 
-filter_k5 = np.array([float((k * math.pi) / 100) for k in range(1, 98)])
-plt.plot(k, signalUnit, k, noiseUnit, filter_k5, o5_filtering_signal)
-plt.legend(['f(x) = sin(x) + 0.5', 'Noise', 'Filtering'])
-plt.xlabel('x')
-plt.ylabel('f(x)')
-plt.title('Размер скользящего окна r = 5')
-plt.grid()
-plt.show()
+kFilter5 = np.array([float((k * math.pi) / 100) for k in range(1, 98)])
+pyplot.plot(k, Signal, k, Noise, kFilter5, filteringSignal5)
+pyplot.title('Functions (r = 5)')
+pyplot.ylabel('f(x)')
+pyplot.xlabel('x')
+pyplot.legend(['f(x) = sin(x) + 0.5', 'Noise', 'Filtering'])
+pyplot.grid()
+pyplot.show()
 
-mov_wind5.dotsPlot()
+filter5.dotsPlot()
