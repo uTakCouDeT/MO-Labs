@@ -3,6 +3,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as pyplot
 
+
 # Вариант 23
 # Среднее гармоническое
 # Манхэттен
@@ -70,7 +71,7 @@ class Filtering(object):
 
     def GarmonicMeanMethod(self, noise_arr, lambdaMas):
         r = self.r
-        K = 100
+        global K
         M = int((r - 1) / 2)
         N = int((math.log(1 - 0.95)) / math.log(1 - (0.01 / math.pi)))
         for i in range(len(lambdaMas)):
@@ -102,7 +103,7 @@ class Filtering(object):
 
     def OptimalSignSearch(self):
         r = self.r
-        K = 100
+        global K
         M = int((r - 1) / 2)
         minDist = min(self.distant)
         index = self.distant.index(minDist)
@@ -172,7 +173,7 @@ class Filtering(object):
         pyplot.scatter(self.omegas[7], self.deltas[7], color='blue')
         pyplot.scatter(self.omegas[8], self.deltas[8], color='purple')
         pyplot.scatter(self.omegas[9], self.deltas[9], color='pink')
-        pyplot.scatter(self.omegas[10], self.deltas[10], color='grey')
+        pyplot.scatter(self.omegas[10], self.deltas[10], color='brown')
         pyplot.legend([
             # f'{self.omegas[0]:>0.5f} {self.deltas[0]:>0.5f}',
             f'{self.omegas[1]:>0.5f} {self.deltas[1]:>0.5f}',
@@ -190,45 +191,32 @@ class Filtering(object):
         pyplot.grid()
         pyplot.show()
 
+    def PlotPrint(self, k, filteringSignal):
+        global K
+        global kFilter
+        pyplot.plot(k, self.Signal, k, self.Noise, kFilter, filteringSignal)
+        pyplot.title('Functions (r = ' + str(self.r) + ')')
+        pyplot.ylabel('f(x)')
+        pyplot.xlabel('x')
+        pyplot.legend(['f(x) = sin(x) + 0.5', 'Noise', 'Filtering'])
+        pyplot.grid()
+        pyplot.show()
+
 
 K = 100
+R = [3, 5]
 k = np.array([float((k * math.pi) / K) for k in range(0, K + 1)])
 Signal = np.array([(np.sin(elem) + 0.5) for elem in k])
 Noise = np.array([(np.sin(elem) + 0.5) + (random.random() / 2 - 0.25) for elem in k])
 LambaMas = np.array([l_elem / 10 for l_elem in range(0, 11)])
 
-r = 3
-filter3 = Filtering(Signal, Noise, LambaMas, r)
-filter3.GarmonicMeanMethod(Noise, LambaMas)
-filter3.dist()
-Lambda3, dist3, alphas3, omega3, delta3, filteringSignal3, J3 = filter3.OptimalSignSearch()
-filter3.TextPrint(Lambda3, omega3, delta3, J3)
+for r in R:
+    filter = Filtering(Signal, Noise, LambaMas, r)
+    filter.GarmonicMeanMethod(Noise, LambaMas)
+    filter.dist()
+    Lambda, dist, alphas, omega, delta, filteringSignal, J = filter.OptimalSignSearch()
+    kFilter = np.array([float((k * math.pi) / K) for k in range(1, K + 3 - r)])
 
-kFilter3 = np.array([float((k * math.pi) / K) for k in range(1, K)])
-pyplot.plot(k, Signal, k, Noise, kFilter3, filteringSignal3)
-pyplot.title('Functions (r = 3)')
-pyplot.ylabel('f(x)')
-pyplot.xlabel('x')
-pyplot.legend(['f(x) = sin(x) + 0.5', 'Noise', 'Filtering'])
-pyplot.grid()
-pyplot.show()
-
-filter3.DotsPrint()
-
-r = 5
-filter5 = Filtering(Signal, Noise, LambaMas, 5)
-filter5.GarmonicMeanMethod(Noise, LambaMas)
-filter5.dist()
-Lambda5, dist5, alphas5, omega5, delta5, filteringSignal5, J5 = filter5.OptimalSignSearch()
-filter5.TextPrint(Lambda5, omega5, delta5, J5)
-
-kFilter5 = np.array([float((k * math.pi) / 100) for k in range(1, 98)])
-pyplot.plot(k, Signal, k, Noise, kFilter5, filteringSignal5)
-pyplot.title('Functions (r = 5)')
-pyplot.ylabel('f(x)')
-pyplot.xlabel('x')
-pyplot.legend(['f(x) = sin(x) + 0.5', 'Noise', 'Filtering'])
-pyplot.grid()
-pyplot.show()
-
-filter5.DotsPrint()
+    filter.TextPrint(Lambda, omega, delta, J)
+    filter.PlotPrint(k, filteringSignal)
+    filter.DotsPrint()

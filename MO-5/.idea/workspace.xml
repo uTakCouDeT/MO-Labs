@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4c0197dd-397d-42e4-8ec2-733fe441ed22" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../MO-6/cmake-build-debug/.ninja_deps" beforeDir="false" afterPath="$PROJECT_DIR$/../MO-6/cmake-build-debug/.ninja_deps" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../MO-6/cmake-build-debug/.ninja_log" beforeDir="false" afterPath="$PROJECT_DIR$/../MO-6/cmake-build-debug/.ninja_log" afterDir="false" />
@@ -69,7 +70,7 @@
       <updated>1669223637715</updated>
       <workItem from="1669223641749" duration="16000" />
       <workItem from="1669223887397" duration="85000" />
-      <workItem from="1669226440124" duration="7162000" />
+      <workItem from="1669226440124" duration="9256000" />
     </task>
     <servers />
   </component>
@@ -88,6 +89,6 @@
     </option>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/MO_5$main.coverage" NAME="main Coverage Results" MODIFIED="1669233500678" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MO_5$main.coverage" NAME="main Coverage Results" MODIFIED="1669235692168" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
