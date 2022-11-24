@@ -248,7 +248,7 @@ public:
         while (SolutionExists) {
             if (CheckSolution()) {
                 if (!Silence) {
-                    std::cout << "A reference solution is found\n=============================================="
+                    std::cout << "A reference solution is found\n====================================================="
                               << std::endl;
                 }
                 break;
@@ -292,7 +292,7 @@ public:
     /// Вывод симплекс таблицы
     void Print(const std::string &function = "F", const std::string &variable = "x") {
         auto Matrix = ConvertToMatrix();
-        std::cout << "==============================================\n\t";
+        std::cout << "=====================================================\n\t";
         for (int i = 0; i < Matrix[0].size() - 1; ++i) {
             std::cout << ' ' << variable << RowXmas[i] << "\t";
         }
@@ -314,12 +314,12 @@ public:
             if (i >= 0) { std::cout << ' '; }
             std::cout << std::fixed << std::setprecision(2) << i;
         }
-        std::cout << "\n==============================================" << std::endl;
+        std::cout << "\n=====================================================" << std::endl;
     }
 
     /// Вывод условия в каноническом виде
     void CanonicalPrint(const std::string &function = "F", const std::string &variable = "x") {
-        std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
+        std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
         std::cout << function << "   =   ";
         for (int i = 0; i < c.size() - 1; ++i) {
             if (c[i] != -1) {
@@ -332,7 +332,7 @@ public:
         }
         std::cout << variable << RowXmas[c.size() - 1] << "  -->  ";
         if (Max) { std::cout << "max"; } else { std::cout << "min"; }
-        std::cout << "\n------------------------------------------------------------------------------\n";
+        std::cout << "\n-----------------------------------------------------------------------------------------\n";
 
         auto Matrix = ConvertToMatrix();
         for (int i = 0; i < Matrix.size() - 1; ++i) {
@@ -344,7 +344,7 @@ public:
             }
             std::cout << "   <=   " << Matrix[i][Matrix[i].size() - 1] << std::endl;
         }
-        std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
+        std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
     }
 
     /// Транспонирование марицы
@@ -381,20 +381,20 @@ public:
 
 int main() {
 
-    std::vector<double> c = {1, 1, 1};
-    std::vector<std::vector<double>> A = {{-1, -2, -7},
-                                          {-3, -6, -2},
-                                          {-9, -2, -6},
-                                          {-6, -3, -5}};
-    std::vector<double> b = {-1, -1, -1, -1};
+//    std::vector<double> c = {1, 1, 1};
+//    std::vector<std::vector<double>> A = {{-1, -2, -7},
+//                                          {-3, -6, -2},
+//                                          {-9, -2, -6},
+//                                          {-6, -3, -5}};
+//    std::vector<double> b = {-1, -1, -1, -1};
 
-//    std::vector<double> c = {1, 1, 1, 1};
-//    std::vector<std::vector<double>> A = {{-7,  -7,  -15, -5},
-//                                          {-19, -18, -3,  -12},
-//                                          {-1,  -5,  -16, -19},
-//                                          {-19, -2,  -19, -14},
-//                                          {-8,  -6,  -4,  -18}};
-//    std::vector<double> b = {-1, -1, -1, -1, -1};
+    std::vector<double> c = {1, 1, 1, 1};
+    std::vector<std::vector<double>> A = {{-7,  -7,  -15, -5},
+                                          {-19, -18, -3,  -12},
+                                          {-1,  -5,  -16, -19},
+                                          {-19, -2,  -19, -14},
+                                          {-8,  -6,  -4,  -18}};
+    std::vector<double> b = {-1, -1, -1, -1, -1};
 
     Simplex strategyA = Simplex(c, A, b, "min");
     strategyA.SimplexMethod("W", "u");
