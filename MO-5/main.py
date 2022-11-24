@@ -184,17 +184,17 @@ class Filtering(object):
         pyplot.scatter(self.omegas[9], self.deltas[9], color='pink')
         pyplot.scatter(self.omegas[10], self.deltas[10], color='brown')
         pyplot.legend([
-            # f'{self.omegas[0]:>0.5f} {self.deltas[0]:>0.5f}',
-            f'{self.omegas[1]:>0.5f} {self.deltas[1]:>0.5f}',
-            f'{self.omegas[2]:>0.5f} {self.deltas[2]:>0.5f}',
-            f'{self.omegas[3]:>0.5f} {self.deltas[3]:>0.5f}',
-            f'{self.omegas[4]:>0.5f} {self.deltas[4]:>0.5f}',
-            f'{self.omegas[5]:>0.5f} {self.deltas[5]:>0.5f}',
-            f'{self.omegas[6]:>0.5f} {self.deltas[6]:>0.5f}',
-            f'{self.omegas[7]:>0.5f} {self.deltas[7]:>0.5f}',
-            f'{self.omegas[8]:>0.5f} {self.deltas[8]:>0.5f}',
-            f'{self.omegas[9]:>0.5f} {self.deltas[9]:>0.5f}',
-            f'{self.omegas[10]:>0.5f} {self.deltas[10]:>0.5f}'])
+            # f'lambda {self.LambdaMas[0]:>0.1f} ',
+            f'lambda {self.LambdaMas[1]:>0.1f} ',
+            f'lambda {self.LambdaMas[2]:>0.1f} ',
+            f'lambda {self.LambdaMas[3]:>0.1f} ',
+            f'lambda {self.LambdaMas[4]:>0.1f} ',
+            f'lambda {self.LambdaMas[5]:>0.1f} ',
+            f'lambda {self.LambdaMas[6]:>0.1f} ',
+            f'lambda {self.LambdaMas[7]:>0.1f} ',
+            f'lambda {self.LambdaMas[8]:>0.1f} ',
+            f'lambda {self.LambdaMas[9]:>0.1f} ',
+            f'lambda {self.LambdaMas[10]:>0.1f} '])
         pyplot.ylabel("delta")
         pyplot.xlabel("omega")
         pyplot.grid()
